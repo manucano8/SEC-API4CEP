@@ -1,4 +1,4 @@
-package es.uca.api4cep.exceptions;
+package es.uca.secapi4cep.exceptions;
 
 public class ResourceNotFoundException extends RuntimeException {
 

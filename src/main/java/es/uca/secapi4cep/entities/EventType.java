@@ -1,4 +1,4 @@
-package es.uca.api4cep.entities;
+package es.uca.secapi4cep.entities;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "TABLE_EVENT_PATTERN")
+@Table(name = "TABLE_EVENT_TYPE")
 @Getter @Setter
-public class EventPattern {
+public class EventType {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

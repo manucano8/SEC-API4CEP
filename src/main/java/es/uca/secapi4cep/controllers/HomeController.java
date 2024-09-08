@@ -1,4 +1,4 @@
-package es.uca.api4cep.controllers;
+package es.uca.secapi4cep.controllers;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Controller;

@@ -1,4 +1,4 @@
-package es.uca.api4cep.config;
+package es.uca.secapi4cep.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.header.writers.ContentSecurityPolicyHeaderWriter;
 import org.springframework.security.web.header.writers.StaticHeadersWriter;
 
-import es.uca.api4cep.services.UserDetailsInfoService;
+import es.uca.secapi4cep.services.UserDetailsInfoService;
 
 
 @Configuration

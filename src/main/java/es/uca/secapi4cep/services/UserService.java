@@ -1,13 +1,13 @@
-package es.uca.api4cep.services;
+package es.uca.secapi4cep.services;
 
 import java.util.Collections;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import es.uca.api4cep.entities.User;
-import es.uca.api4cep.exceptions.ResourceNotFoundException;
-import es.uca.api4cep.repositories.UserRepository;
+import es.uca.secapi4cep.entities.User;
+import es.uca.secapi4cep.exceptions.ResourceNotFoundException;
+import es.uca.secapi4cep.repositories.UserRepository;
 
 @Service
 public class UserService {

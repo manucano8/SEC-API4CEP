@@ -1,4 +1,4 @@
-package es.uca.api4cep.config;
+package es.uca.secapi4cep.config;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import es.uca.api4cep.services.JwtService;
+import es.uca.secapi4cep.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

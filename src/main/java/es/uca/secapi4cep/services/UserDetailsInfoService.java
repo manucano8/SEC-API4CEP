@@ -1,4 +1,4 @@
-package es.uca.api4cep.services;
+package es.uca.secapi4cep.services;
 
 import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -6,9 +6,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import es.uca.api4cep.entities.User;
-import es.uca.api4cep.entities.UserInfo;
-import es.uca.api4cep.repositories.UserRepository;
+import es.uca.secapi4cep.entities.User;
+import es.uca.secapi4cep.entities.UserInfo;
+import es.uca.secapi4cep.repositories.UserRepository;
 
 
 @Service

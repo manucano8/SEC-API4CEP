@@ -1,4 +1,4 @@
-package es.uca.api4cep.services;
+package es.uca.secapi4cep.services;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import java.util.concurrent.TimeoutException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import es.uca.api4cep.repositories.EventPatternRepository;
+import es.uca.secapi4cep.repositories.EventPatternRepository;
 import com.rabbitmq.client.Channel;
-import es.uca.api4cep.entities.EventPattern;
+import es.uca.secapi4cep.entities.EventPattern;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 
 @Service

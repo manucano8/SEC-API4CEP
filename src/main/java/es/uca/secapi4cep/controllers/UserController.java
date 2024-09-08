@@ -1,4 +1,4 @@
-package es.uca.api4cep.controllers;
+package es.uca.secapi4cep.controllers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,11 +28,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import es.uca.api4cep.dtos.CreateUserDTO;
-import es.uca.api4cep.dtos.UserDTO;
-import es.uca.api4cep.entities.User;
-import es.uca.api4cep.services.JwtService;
-import es.uca.api4cep.services.UserService;
+import es.uca.secapi4cep.dtos.CreateUserDTO;
+import es.uca.secapi4cep.dtos.UserDTO;
+import es.uca.secapi4cep.entities.User;
+import es.uca.secapi4cep.services.JwtService;
+import es.uca.secapi4cep.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;

@@ -1,4 +1,4 @@
-package es.uca.api4cep.controllers;
+package es.uca.secapi4cep.controllers;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,8 +23,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import es.uca.api4cep.entities.EventType;
-import es.uca.api4cep.services.EventTypeService;
+import es.uca.secapi4cep.entities.EventType;
+import es.uca.secapi4cep.services.EventTypeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

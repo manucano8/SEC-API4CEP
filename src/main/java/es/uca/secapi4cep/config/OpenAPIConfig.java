@@ -1,4 +1,4 @@
-package es.uca.api4cep.config;
+package es.uca.secapi4cep.config;
 
 import java.util.List;
 

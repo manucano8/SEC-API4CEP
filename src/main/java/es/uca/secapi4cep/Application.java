@@ -1,4 +1,4 @@
-package es.uca.api4cep;
+package es.uca.secapi4cep;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

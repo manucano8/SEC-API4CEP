@@ -1,4 +1,4 @@
-package es.uca.api4cep.dtos;
+package es.uca.secapi4cep.dtos;
 
 import java.util.List;
 

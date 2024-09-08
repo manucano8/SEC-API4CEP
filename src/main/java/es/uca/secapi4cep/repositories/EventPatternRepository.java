@@ -1,8 +1,8 @@
-package es.uca.api4cep.repositories;
+package es.uca.secapi4cep.repositories;
 
 import org.springframework.stereotype.Repository;
 
-import es.uca.api4cep.entities.EventPattern;
+import es.uca.secapi4cep.entities.EventPattern;
 
 import java.util.List;
 
