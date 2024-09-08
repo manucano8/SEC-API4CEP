@@ -1,0 +1,62 @@
+import com.rabbitmq.client.ConnectionFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.beans.factory.annotation.Value;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.security.KeyStore;
+
+@Configuration
+public class RabbitMQConfig {
+
+    // Property for the RabbitMQ password, injected from configuration
+    @Value("${rabbitmq.password}")
+    private String rabbitMQPassword;
+
+    /**
+     * Configures the RabbitMQ connection factory with SSL/TLS settings.
+     * @return A configured ConnectionFactory instance
+     * @throws Exception If an error occurs during configuration
+     */
+    @Bean
+    public ConnectionFactory rabbitConnectionFactory() throws Exception {
+
+        ConnectionFactory factory = new ConnectionFactory();
+
+        // Set the RabbitMQ host
+        factory.setHost("localhost");
+
+        // Set the RabbitMQ port for SSL/TLS
+        factory.setPort(5671);
+
+        // Create and initialize the SSLContext for secure communication
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+
+        // Load the client key store
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(new FileInputStream("classpath:client.p12"), rabbitMQPassword.toCharArray());
+
+        // Load the trust store containing the CA certificates
+        KeyStore trustStore = KeyStore.getInstance("PKCS12");
+        trustStore.load(new FileInputStream("classpath:ca.p12"), rabbitMQPassword.toCharArray());
+
+        // Initialize the KeyManagerFactory with the client key store
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+        kmf.init(keyStore, rabbitMQPassword.toCharArray());
+
+        // Initialize the TrustManagerFactory with the trust store
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStore);
+
+        // Initialize the SSLContext with the KeyManagers and TrustManagers
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
+
+        // Set the SSL/TLS protocol for the RabbitMQ connection
+        factory.useSslProtocol(sslContext);
+
+        return factory;
+    }
+}
