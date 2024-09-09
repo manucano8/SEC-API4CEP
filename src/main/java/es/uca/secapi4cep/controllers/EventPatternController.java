@@ -70,8 +70,10 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EventPattern> getAllEventPatterns() {
-        return eventPatternService.getAllEventPatterns();
+    public ResponseEntity<List<EventPattern>> getAllEventPatterns() {
+        // Fetches and returns all event patterns from the service
+        List<EventPattern> eventPatterns = eventPatternService.getAllEventPatterns();
+        return ResponseEntity.ok(eventPatterns);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -110,12 +112,24 @@ public class EventPatternController {
         description = "Retrieves the event pattern with the provided ID"
     )
     @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Event Pattern successfully retrieved."),
+        @ApiResponse(responseCode = "404", description = "Event Pattern not found."),
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<EventPattern> getEventPatternById(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, Object>> getEventPatternById(@PathVariable("id") Long id) {
         // Fetches and returns the event pattern by ID
-        return this.eventPatternService.getEventPatternById(id);
+        Map<String, Object> responseBody = new HashMap<>();
+        Optional<EventPattern> eventPattern = this.eventPatternService.getEventPatternById(id);
+        if (eventPattern.isPresent()) {
+            responseBody.put("status", HttpStatus.OK.value());
+            responseBody.put("eventPattern", eventPattern.get());
+            return ResponseEntity.ok(responseBody);
+        } else {
+            responseBody.put("message", "Event pattern not found.");
+            responseBody.put("status", HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+        }
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -124,18 +138,25 @@ public class EventPatternController {
         description = "Updates an existing pattern identified by its ID in the database and in the CEP engine if necessary"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
+        @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated."),
+        @ApiResponse(responseCode = "200", description = "Event pattern succesfully updated."),
+        @ApiResponse(responseCode = "400", description = "Event pattern has not been updated.")
     })
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String updateEventPattern(@RequestBody EventPattern eventPattern, @PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> updateEventPattern(@RequestBody EventPattern eventPattern, @PathVariable("id") Long id) {
         // Attempt to update the event pattern and return appropriate status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = this.eventPatternService.updateEventPattern(eventPattern, id);
         if (ok) {
             logger.info("User " + getCurrentUsername() + " has successfully updated the event pattern with id: {}", id);
-            return EVENT_PATTERN_STRING + id + " has been updated";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been updated");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to update event pattern with id: {}", id);
-            return EVENT_PATTERN_STRING + id + " has not been updated";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been updated");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         } 
     }
 
@@ -148,13 +169,18 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/ready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String readyToDeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> readyToDeploy(@PathVariable Long id) {
         // Marks the event pattern as ready to deploy and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventPatternService.updateStatus(id, true);
         if (ok) {
-            return EVENT_PATTERN_STRING + id + " has been set as ready to deploy";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been set as ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
-            return EVENT_PATTERN_STRING + id + " has not been set as ready to deploy";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been set as ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -167,13 +193,18 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/unready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String unReadyToDeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> unReadyToDeploy(@PathVariable Long id) {
         // Marks the event pattern as not ready to deploy and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventPatternService.updateStatus(id, false);
         if (ok) {
-            return EVENT_PATTERN_STRING + id + " has been set as not ready to deploy";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been set as not ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
-            return EVENT_PATTERN_STRING + id + " has not been set as not ready to deploy";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been set as not ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -186,15 +217,20 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/deploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deploy(@PathVariable Long id) {
         // Deploys the event pattern, marks it as deployed and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventPatternService.updateDeployingStatus(id, true);
         if (ok) {
             logger.info(EVENT_PATTERN_STRING + id + " has been deployed by " + getCurrentUsername());
-            return EVENT_PATTERN_STRING + id + " has been deployed";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been deployed");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to deploy event pattern with id: {}", id);
-            return EVENT_PATTERN_STRING + id + " has not been deployed";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been deployed");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -207,15 +243,20 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/undeploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String undeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> undeploy(@PathVariable Long id) {
         // Undeploys the event pattern, marks it as not deployed and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventPatternService.updateDeployingStatus(id, false);
         if (ok) {
             logger.info(EVENT_PATTERN_STRING + id + " has been undeployed by " + getCurrentUsername());
-            return EVENT_PATTERN_STRING + id + " has been undeployed";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been undeployed");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to undeploy event pattern with id: {}", id);
-            return EVENT_PATTERN_STRING + id + " has not been undeployed";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been undeployed");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -228,9 +269,13 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(value = "/name", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EventPattern> findByName(@RequestParam String name) {
+    public ResponseEntity<Map<String, Object>> findByName(@RequestParam String name) {
         // Fetches and returns the event pattern by name
-        return this.eventPatternService.findByName(name);
+        Map<String, Object> responseBody = new HashMap<>();
+        List<EventPattern> eventPatterns = this.eventPatternService.findByName(name);
+        responseBody.put("status", HttpStatus.OK.value());
+        responseBody.put("eventPatterns", eventPatterns);
+        return ResponseEntity.ok(responseBody);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -242,15 +287,20 @@ public class EventPatternController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @DeleteMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteEventPattern(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> deleteEventPattern(@PathVariable("id") Long id) {
         // Attempt to delete the event pattern and return appropriate status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = this.eventPatternService.deleteEventPattern(id);
         if (ok) {
             logger.info(EVENT_PATTERN_STRING + id + " has been deleted by " + getCurrentUsername());
-            return EVENT_PATTERN_STRING + id + " has been deleted";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has been deleted");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to delete event pattern with id: {}", id);
-            return EVENT_PATTERN_STRING + id + " has not been deleted";
+            responseBody.put("message", EVENT_PATTERN_STRING + id + " has not been deleted");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 }

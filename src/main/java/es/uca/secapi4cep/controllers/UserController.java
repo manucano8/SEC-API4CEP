@@ -82,7 +82,7 @@ public class UserController {
         @ApiResponse(responseCode = "400", description = "Invalid input provided")
     })
 	@PostMapping(value= "/create", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<String> createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
+	public ResponseEntity<Map<String,String>> createUser(@RequestBody @Valid CreateUserDTO createUserDTO) {
 		// Creates a new User entity based on the input CreateUserDTO and assigns it the role of USER
 		User user = new User();
 		user.setUsername(createUserDTO.getUsername());
@@ -90,23 +90,33 @@ public class UserController {
 		user.setPassword(createUserDTO.getPassword());
 		user.setRoles(Collections.singletonList("USER"));
 		User createUser = userService.createUser(user);
+
+		Map<String, String> response = new HashMap<>();
+
 		if(createUser!=null) {
 			logger.info("User " + createUser.getId() + " created succesfully.");
-			return new ResponseEntity<>("User created successfully...!", HttpStatus.CREATED);
+			response.put("message", "User created successfully!");
+			return new ResponseEntity<>(response, HttpStatus.CREATED);
 		}else {
 			logger.error("Failed to create user.");
+			response.put("message", "Failed to create user.");
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		}
 	}
 	
 	@Operation(
 		summary = "Retrieves all existing users",
-		description ="Retrieves all existing users. Only admins are authorized to use this operation.",
-		responses = @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(hidden = true))))
+		description ="Retrieves all existing users. Only admins are authorized to use this operation."
+	)
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", content = @Content(schema = @Schema(hidden = true))),
+		@ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated."),
+		@ApiResponse(responseCode = "404", description = "No users found.")
+	})
     @SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping(value= "/getAll", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<Iterable<UserDTO>> getAllUser(){
+	public ResponseEntity<?> getAllUser(){
 		// Retrieve all users from the service and map them to UserDTOs
 		Iterable<User> findAllUser = userService.findAllUser();
 		if(findAllUser!=null) {
@@ -123,7 +133,9 @@ public class UserController {
 			return new ResponseEntity<>(userDTOs, HttpStatus.OK);
 		}else {
 			logger.error("User " + getCurrentUsername() + " failed to retrieve all users.");
-			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+			Map<String, String> response = new HashMap<>();
+			response.put("message", "No users found.");
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
 	
@@ -140,7 +152,7 @@ public class UserController {
     @SecurityRequirement(name = "Bearer Authentication")
 	@GetMapping(value = "/getById/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<UserDTO> getUserById(@PathVariable Long id){
+	public ResponseEntity<?> getUserById(@PathVariable Long id){
 		// Retrieve a specific user by ID and return as DTO
 		User findById = userService.findById(id);
 		if(findById!=null) {
@@ -153,6 +165,8 @@ public class UserController {
 			return new ResponseEntity<>(userDTO, HttpStatus.OK);
 		}else {
 			logger.warn("User with ID {} not found. Request made by user: {}", id, getCurrentUsername());
+			Map<String, String> response = new HashMap<>();
+            response.put("message", "User not found.");
 			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 		}
 	}
@@ -169,15 +183,18 @@ public class UserController {
     })
 	@PutMapping(value = "/update/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<User> updateUser(@RequestBody User user, @PathVariable Long id){
+	public ResponseEntity<?> updateUser(@RequestBody User user, @PathVariable Long id){
 		// Update an existing user based on the input data
 		User updateUser = userService.updateUser(user, id);
+		Map<String, String> response = new HashMap<>();
 		if(updateUser!=null) {
 			logger.info("User with ID {} updated successfully by user: {}", id, getCurrentUsername());
-			return new ResponseEntity<>(updateUser, HttpStatus.OK);
+			response.put("message", "User updated successfully.");
+			return new ResponseEntity<>(response, HttpStatus.OK);
 		}else {
 			logger.error("Failed to update user with ID {}. Request made by user: {}", id, getCurrentUsername());
-			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+			response.put("message", "Failed to update user.");
+			return new ResponseEntity<>(response,HttpStatus.BAD_REQUEST);
 		}
 	}
 	
@@ -192,11 +209,13 @@ public class UserController {
     })
 	@DeleteMapping(value = "/delete/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
 	@PreAuthorize("hasAuthority('ADMIN')")
-	public ResponseEntity<String> deleteUser(@PathVariable Long id){
+	public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id){
 		// Delete a user given its ID
 		userService.deleteUser(id);
 		logger.info("User with ID {} deleted successfully by user: {}", id, getCurrentUsername());
-		return new ResponseEntity<>("user deleted successfully...!", HttpStatus.OK);
+		Map<String, String> response = new HashMap<>();
+        response.put("message", "User deleted successfully.");
+		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@Operation(

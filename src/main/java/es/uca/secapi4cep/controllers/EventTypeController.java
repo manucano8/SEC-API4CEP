@@ -69,9 +69,10 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EventType> getAllEventTypes() {
+    public ResponseEntity<List<EventType>> getAllEventTypes() {
         // Fetches and returns all event types from the service
-        return eventTypeService.getAllEventTypes();
+        List<EventType> eventTypes = eventTypeService.getAllEventTypes();
+        return ResponseEntity.ok(eventTypes);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -110,12 +111,24 @@ public class EventTypeController {
         description = "Retrieves the event type with the provided ID"
     )
     @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Event Type successfully retrieved."),
+        @ApiResponse(responseCode = "404", description = "Event Type not found."),
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<EventType> getEventTypeById(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, Object>> getEventTypeById(@PathVariable("id") Long id) {
          // Fetches and returns the event type by ID
-        return this.eventTypeService.getEventTypeById(id);
+         Map<String, Object> responseBody = new HashMap<>();
+         Optional<EventType> eventType = this.eventTypeService.getEventTypeById(id);
+         if (eventType.isPresent()) {
+             responseBody.put("status", HttpStatus.OK.value());
+             responseBody.put("eventType", eventType.get());
+             return ResponseEntity.ok(responseBody);
+         } else {
+             responseBody.put("message", "Event type not found.");
+             responseBody.put("status", HttpStatus.NOT_FOUND.value());
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
+         }
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -124,18 +137,25 @@ public class EventTypeController {
         description = "Updates an existing type identified by its ID in the database and in the CEP engine if necessary"
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
+        @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated."),
+        @ApiResponse(responseCode = "200", description = "Event type succesfully updated."),
+        @ApiResponse(responseCode = "400", description = "Event type has not been updated.")
     })
     @PutMapping(path = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public String updateEventType(@RequestBody EventType eventType, @PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> updateEventType(@RequestBody EventType eventType, @PathVariable("id") Long id) {
         // Attempt to update the event type and return appropriate status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = this.eventTypeService.updateEventType(eventType, id);
         if (ok) {
             logger.info("User " + getCurrentUsername() + " has successfully updated the event type with id: {}", id);
-            return EVENT_TYPE_STRING + id + " has been updated";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been updated");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to update event type with id: {}", id);
-            return EVENT_TYPE_STRING + id + " has not been updated";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been updated");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -148,13 +168,18 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/ready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String readyToDeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> readyToDeploy(@PathVariable Long id) {
         // Marks the event type as ready to deploy and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventTypeService.updateStatus(id, true);
         if (ok) {
-          return EVENT_TYPE_STRING + id + " has been set as ready to deploy";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been set as ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
-          return EVENT_TYPE_STRING + id + " has not been set as ready to deploy";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been set as ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -167,13 +192,18 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/unready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String unReadyToDeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> unReadyToDeploy(@PathVariable Long id) {
         // Marks the event type as not ready to deploy and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventTypeService.updateStatus(id, false);
         if (ok) {
-          return EVENT_TYPE_STRING + id + " has been set as not ready to deploy";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been set as not ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
-          return EVENT_TYPE_STRING + id + " has not been set as not ready to deploy";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been set as not ready to deploy");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -186,15 +216,20 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/deploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deploy(@PathVariable Long id) {
         // Deploys the event type, marks it as deployed and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventTypeService.updateDeployingStatus(id, true);
         if (ok) {
             logger.info(EVENT_TYPE_STRING + id + " has been deployed by " + getCurrentUsername());
-            return EVENT_TYPE_STRING + id + " has been deployed";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been deployed");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to deploy event type with id: {}", id);
-            return EVENT_TYPE_STRING + id + " has not been deployed";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been deployed");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -207,15 +242,20 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @PutMapping(value = "/undeploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public String undeploy(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> undeploy(@PathVariable Long id) {
         // Undeploys the event type, marks it as deployed and return status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = eventTypeService.updateDeployingStatus(id, false);
         if (ok) {
             logger.info(EVENT_TYPE_STRING + id + " has been undeployed by " + getCurrentUsername());
-            return EVENT_TYPE_STRING + id + " has been undeployed";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been undeployed");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to undeploy event type with id: {}", id);
-            return EVENT_TYPE_STRING + id + " has not been undeployed";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been undeployed");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 
@@ -228,9 +268,13 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @GetMapping(value = "/name", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EventType> findByName(@RequestParam String name) {
+    public ResponseEntity<Map<String, Object>> findByName(@RequestParam String name) {
         // Fetches and returns event type by name
-        return this.eventTypeService.findByName(name);
+        Map<String, Object> responseBody = new HashMap<>();
+        List<EventType> eventTypes = this.eventTypeService.findByName(name);
+        responseBody.put("status", HttpStatus.OK.value());
+        responseBody.put("eventTypes", eventTypes);
+        return ResponseEntity.ok(responseBody);
     }
 
     @SecurityRequirement(name = "Bearer Authentication")
@@ -242,15 +286,20 @@ public class EventTypeController {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
     @DeleteMapping(path = "/{id}",produces = MediaType.APPLICATION_JSON_VALUE)
-    public String deleteEventType(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> deleteEventType(@PathVariable("id") Long id) {
         // Attempt to delete the event type and return appropriate status message
+        Map<String, String> responseBody = new HashMap<>();
         boolean ok = this.eventTypeService.deleteEventType(id);
         if (ok) {
             logger.info(EVENT_TYPE_STRING + id + " has been deleted by " + getCurrentUsername());
-            return EVENT_TYPE_STRING + id + " has been deleted";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has been deleted");
+            responseBody.put("status", String.valueOf(HttpStatus.OK.value()));
+            return ResponseEntity.ok(responseBody);
         } else {
             logger.warn("User " + getCurrentUsername() + " failed to delete event type with id: {}", id);
-            return EVENT_TYPE_STRING + id + " has not been deleted";
+            responseBody.put("message", EVENT_TYPE_STRING + id + " has not been deleted");
+            responseBody.put("status", String.valueOf(HttpStatus.BAD_REQUEST.value()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseBody);
         }
     }
 }
