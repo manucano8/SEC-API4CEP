@@ -66,8 +66,8 @@ public class EventPatternService {
             String deployQueue = "deploy";
             String undeployQueue = "undeploy";
             
-            outputChannel.queueDeclare(deployQueue, false, false, false, null);
-            outputChannel.queueDeclare(undeployQueue, false, false, false, null);
+            outputChannel.queueDeclare(deployQueue, true, false, false, null);
+            outputChannel.queueDeclare(undeployQueue, true, false, false, null);
 
             Optional<EventPattern> eventPatternOptional = eventPatternRepository.findById(id);
             if (!eventPatternOptional.isEmpty()){
@@ -138,8 +138,8 @@ public class EventPatternService {
             String deployQueue = "deploy";
             String undeployQueue = "undeploy";
             
-            outputChannel.queueDeclare(deployQueue, false, false, false, null);
-            outputChannel.queueDeclare(undeployQueue, false, false, false, null);
+            outputChannel.queueDeclare(deployQueue, true, false, false, null);
+            outputChannel.queueDeclare(undeployQueue, true, false, false, null);
 
             Optional<EventPattern> eventPatternOptional = eventPatternRepository.findById(id);
             if (!eventPatternOptional.isEmpty()){

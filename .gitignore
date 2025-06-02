@@ -37,3 +37,5 @@ src/main/resources/application.properties
 src/main/resources/ca.p12
 src/main/resources/client.p12
 src/main/resources/HTTPS.jks
+src/main/resources/api4cep.uca.es.p12
+src/main/java/es/uca/secapi4cep/config/RabbitMQConfig

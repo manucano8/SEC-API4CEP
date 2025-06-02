@@ -168,7 +168,7 @@ public class EventPatternController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
-    @PutMapping(value = "/ready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}/ready", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> readyToDeploy(@PathVariable Long id) {
         // Marks the event pattern as ready to deploy and return status message
         Map<String, String> responseBody = new HashMap<>();
@@ -192,7 +192,7 @@ public class EventPatternController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
-    @PutMapping(value = "/unready/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}/unready", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> unReadyToDeploy(@PathVariable Long id) {
         // Marks the event pattern as not ready to deploy and return status message
         Map<String, String> responseBody = new HashMap<>();
@@ -216,7 +216,7 @@ public class EventPatternController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
-    @PutMapping(value = "/deploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}/deploy", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> deploy(@PathVariable Long id) {
         // Deploys the event pattern, marks it as deployed and return status message
         Map<String, String> responseBody = new HashMap<>();
@@ -242,7 +242,7 @@ public class EventPatternController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
-    @PutMapping(value = "/undeploy/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{id}/undeploy", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, String>> undeploy(@PathVariable Long id) {
         // Undeploys the event pattern, marks it as not deployed and return status message
         Map<String, String> responseBody = new HashMap<>();
@@ -268,7 +268,7 @@ public class EventPatternController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "403", description = "Bad credentials. You must be properly authenticated.")
     })
-    @GetMapping(value = "/name", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(path = "/{name}/byName", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map<String, Object>> findByName(@RequestParam String name) {
         // Fetches and returns the event pattern by name
         Map<String, Object> responseBody = new HashMap<>();
